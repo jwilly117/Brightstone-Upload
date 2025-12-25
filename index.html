@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload Receipt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #f3f4f6;
+    }
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h1 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    p {
+      font-size: 0.9rem;
+      color: #4b5563;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .field {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+    input[type="file"] {
+      width: 100%;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+    }
+    button {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #2563eb;
+      color: #ffffff;
+    }
+    button:disabled {
+      opacity: 0.6;
+    }
+    .status {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Send Receipt</h1>
+    <p>Take a clear photo of the receipt and send it to the office.</p>
+
+    <!-- Optional: employee name / code -->
+    <div class="field">
+      <label for="senderName">Your name (optional)</label>
+      <input id="senderName" type="text" placeholder="e.g. Jake W." />
+    </div>
+
+    <div class="field">
+      <label for="photo">Receipt photo</label>
+      <input
+        id="photo"
+        type="file"
+        accept="image/*"
+        capture="environment" />
+    </div>
+
+    <button id="sendBtn">Send Receipt</button>
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://your-backend-domain.com/receipt"; // <-- change this
+
+    const photoInput = document.getElementById("photo");
+    const sendBtn = document.getElementById("sendBtn");
+    const statusEl = document.getElementById("status");
+    const senderNameInput = document.getElementById("senderName");
+
+    sendBtn.addEventListener("click", async () => {
+      const file = photoInput.files[0];
+      if (!file) {
+        statusEl.textContent = "Please select or take a photo first.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("receipt", file);
+      formData.append("senderName", senderNameInput.value || "");
+
+      sendBtn.disabled = true;
+      statusEl.textContent = "Uploading...";
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Upload failed");
+        }
+
+        statusEl.textContent = "Receipt sent successfully. Thank you!";
+        photoInput.value = "";
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "There was a problem sending your receipt. Please try again.";
+      } finally {
+        sendBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
