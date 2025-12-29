@@ -9,18 +9,29 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       margin: 0;
       padding: 16px;
-      background: #f3f4f6;
+      background: #57698d;
     }
     .container {
       max-width: 420px;
       margin: 0 auto;
       background: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      padding: 24px 20px 20px;
+      border-radius: 18px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+    }
+    .logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+    .logo img {
+      max-width: 84px;
+      max-height: 84px;
+      border-radius: 14px;
+      object-fit: cover;
     }
     h1 {
-      font-size: 1.25rem;
+      font-size: 1.35rem;
       margin-bottom: 8px;
       text-align: center;
     }
@@ -40,54 +51,108 @@
       margin-bottom: 6px;
       color: #374151;
     }
-    input[type="file"] {
-      width: 100%;
-    }
     input[type="text"] {
-      width: 100%;
+      width: 93%;
+      height: 30px;
       padding: 8px 10px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #d1d5db;
       font-size: 0.9rem;
     }
+
+    /* hide native file input */
+    .hidden-file-input {
+      display: none;
+    }
+
+    /* 🎯 UPDATED: Much cleaner orange button */
+    .file-button {
+      width: 93%;
+      display: inline-block;
+      padding: 9px 12px;
+      border-radius: 14px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: #f59e0b;
+      color: #ffffff;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.05s ease, opacity 0.1s ease;
+    }
+    .file-button:active {
+      transform: scale(0.985);
+      opacity: 0.9;
+    }
+
+    .file-name {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #6b7280;
+      text-align: center;
+      word-break: break-all;
+      min-height: 16px;
+    }
+
+    /* 🎯 UPDATED: match shape + sizing */
     button {
       width: 100%;
       padding: 10px 14px;
-      border-radius: 999px;
+      border-radius: 14px;
       border: none;
       font-size: 1rem;
       font-weight: 600;
       background: #2563eb;
       color: #ffffff;
+      cursor: pointer;
+      transition: transform 0.05s ease, opacity 0.1s ease;
+      margin-top: 6px;
     }
     button:disabled {
       opacity: 0.6;
+      cursor: default;
     }
+    button:not(:disabled):active {
+      transform: scale(0.985);
+      opacity: 0.9;
+    }
+
     .status {
       margin-top: 12px;
       font-size: 0.85rem;
       text-align: center;
+      color: #111827;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Send Receipt</h1>
-    <p>Take a clear photo of the receipt and send it to the office.</p>
+    <div class="logo">
+      <img src="Brightstone-Mark-ForestGreen.png" alt="Company Logo" />
+    </div>
 
-    <!-- Optional: employee name / code -->
+    <h1>Receipt Upload</h1>
+    <p>Take a clear photo of the receipt and send it to the office. Please wait for the confirmation message at the bottom to appear before leaving this screen. </p>
+
     <div class="field">
-      <label for="senderName">Your name (optional)</label>
-      <input id="senderName" type="text" placeholder="e.g. Jake W." />
+      <label for="senderName">Your name </label>
+      <input id="senderName" type="text" placeholder="e.g. Brad Pitt" />
     </div>
 
     <div class="field">
       <label for="photo">Receipt photo</label>
+
       <input
         id="photo"
         type="file"
         accept="image/*"
-        capture="environment" />
+        capture="environment"
+        class="hidden-file-input"
+      />
+
+      <!-- orange button + filename -->
+      <label for="photo" class="file-button">Choose Photo</label>
+      <div id="fileName" class="file-name">No file chosen</div>
     </div>
 
     <button id="sendBtn">Send Receipt</button>
@@ -95,12 +160,18 @@
   </div>
 
   <script>
-    const API_URL = "https://bot.brightstonetransitions.com/receipt";  // <-- change this
+    const API_URL = "https://bot.brightstonetransitions.com/receipt";
 
     const photoInput = document.getElementById("photo");
     const sendBtn = document.getElementById("sendBtn");
     const statusEl = document.getElementById("status");
     const senderNameInput = document.getElementById("senderName");
+    const fileNameEl = document.getElementById("fileName");
+
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files[0];
+      fileNameEl.textContent = file ? file.name : "No file chosen";
+    });
 
     sendBtn.addEventListener("click", async () => {
       const file = photoInput.files[0];
@@ -117,21 +188,15 @@
       statusEl.textContent = "Uploading...";
 
       try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: formData,
-        });
-
+        const res = await fetch(API_URL, { method: "POST", body: formData });
         const data = await res.json().catch(() => ({}));
 
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Upload failed");
-        }
+        if (!res.ok || !data.ok) throw new Error(data.error || "Upload failed");
 
         statusEl.textContent = "Receipt sent successfully. Thank you!";
         photoInput.value = "";
+        fileNameEl.textContent = "No file chosen";
       } catch (err) {
-        console.error(err);
         statusEl.textContent = "There was a problem sending your receipt. Please try again.";
       } finally {
         sendBtn.disabled = false;
