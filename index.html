@@ -122,6 +122,19 @@
     </div>
 
     <div class="field">
+      <label for="amount">Dollar amount</label>
+      <input
+        id="amount"
+        type="number"
+        inputmode="decimal"
+        step="0.01"
+        min="0"
+        placeholder="e.g. 42.50"
+      />
+    </div>
+
+
+    <div class="field">
       <label for="photo">Receipt photo</label>
 
       <input id="photo" type="file" accept="image/*" class="hidden-file-input" />
@@ -141,6 +154,8 @@
     const statusEl = document.getElementById("status");
     const senderNameInput = document.getElementById("senderName");
     const fileNameEl = document.getElementById("fileName");
+    const amountInput = document.getElementById("amount");
+
 
     photoInput.addEventListener("change", () => {
       const file = photoInput.files[0];
@@ -208,6 +223,8 @@
         const formData = new FormData();
         formData.append("receipt", resizedBlob, "receipt.jpg");
         formData.append("senderName", senderNameInput.value || "");
+        formData.append("amount", amountInput.value || "");   // <-- NEW
+
 
         statusEl.textContent = "Uploading...";
 
