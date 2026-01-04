@@ -11,6 +11,7 @@
       padding: 16px;
       background: #57698d;
     }
+
     .container {
       max-width: 420px;
       margin: 0 auto;
@@ -19,29 +20,36 @@
       border-radius: 18px;
       box-shadow: 0 12px 28px rgba(0,0,0,0.15);
     }
+
     .logo {
       display: flex;
       justify-content: center;
       margin-bottom: 6px;
     }
+
     .logo img {
       max-width: 84px;
       max-height: 84px;
       border-radius: 14px;
       object-fit: cover;
     }
+
     h1 {
       font-size: 1.35rem;
       margin-bottom: 8px;
       text-align: center;
     }
+
     p {
       font-size: 0.9rem;
       color: #4b5563;
       text-align: center;
       margin-bottom: 20px;
     }
-    .field { margin-bottom: 16px; }
+
+    .field {
+      margin-bottom: 16px;
+    }
 
     label {
       display: block;
@@ -60,7 +68,9 @@
       font-size: 0.9rem;
     }
 
-    .hidden-file-input { display: none; }
+    .hidden-file-input {
+      display: none;
+    }
 
     .file-button {
       width: 93%;
@@ -94,15 +104,111 @@
       background: #2563eb;
       color: #ffffff;
       margin-top: 6px;
+      cursor: pointer;
     }
 
-    button:disabled { opacity: 0.6; }
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
 
     .status {
       margin-top: 12px;
       font-size: 0.85rem;
       text-align: center;
       color: #111827;
+    }
+
+    .money-input {
+      position: relative;
+      width: 98%;
+      height: 30px;
+    }
+
+    .money-input .prefix {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      color: #6b7280;
+      pointer-events: none;
+      padding-top: 10px;
+    }
+
+    .money-input input {
+      width: 90%;
+      height: 30px;
+      padding: 8px 10px 8px 26px; /* space for $ */
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+    }
+
+    /* --- Success modal --- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 24px 20px 20px;
+      max-width: 320px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    }
+
+    .modal-check {
+      width: 64px;
+      height: 64px;
+      border-radius: 999px;
+      border: 3px solid #22c55e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+
+    .modal-check svg {
+      width: 32px;
+      height: 32px;
+      stroke: #22c55e;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .modal-text {
+      font-size: 0.9rem;
+      color: #4b5563;
+      margin-bottom: 16px;
+    }
+
+    .modal-button {
+      width: 100%;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: #2563eb;
+      color: #ffffff;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -123,16 +229,21 @@
 
     <div class="field">
       <label for="amount">Dollar amount</label>
-      <input
-        id="amount"
-        type="number"
-        inputmode="decimal"
-        step="0.01"
-        min="0"
-        placeholder="e.g. 42.50"
-      />
+
+      <div class="money-input">
+        <span class="prefix">$</span>
+        <input
+          id="amount"
+          type="number"
+          inputmode="decimal"
+          step="0.01"
+          min="0"
+          placeholder="0.00"
+        />
+      </div>
     </div>
 
+    <br>
 
     <div class="field">
       <label for="photo">Receipt photo</label>
@@ -146,6 +257,22 @@
     <div id="status" class="status"></div>
   </div>
 
+  <!-- Success Modal -->
+  <div id="successModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-check">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 13l4 4L19 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div class="modal-title">Success</div>
+      <div class="modal-text">
+        Receipt sent successfully. Thank you!
+      </div>
+      <button id="modalClose" class="modal-button">Done</button>
+    </div>
+  </div>
+
   <script>
     const API_URL = "https://bot.brightstonetransitions.com/receipt";
 
@@ -156,6 +283,8 @@
     const fileNameEl = document.getElementById("fileName");
     const amountInput = document.getElementById("amount");
 
+    const successModal = document.getElementById("successModal");
+    const modalClose = document.getElementById("modalClose");
 
     photoInput.addEventListener("change", () => {
       const file = photoInput.files[0];
@@ -206,6 +335,22 @@
       });
     }
 
+    function openSuccessModal() {
+      successModal.classList.add("show");
+    }
+
+    function closeSuccessModal() {
+      successModal.classList.remove("show");
+    }
+
+    // Close modal on button click or tapping background
+    modalClose.addEventListener("click", closeSuccessModal);
+    successModal.addEventListener("click", (e) => {
+      if (e.target === successModal) {
+        closeSuccessModal();
+      }
+    });
+
     sendBtn.addEventListener("click", async () => {
       const originalFile = photoInput.files[0];
       if (!originalFile) {
@@ -217,14 +362,13 @@
       statusEl.textContent = "Preparing image...";
 
       try {
-        // shrink BEFORE upload 🔥
+        // shrink BEFORE upload
         const resizedBlob = await resizeImage(originalFile, 1600, 0.8);
 
         const formData = new FormData();
         formData.append("receipt", resizedBlob, "receipt.jpg");
         formData.append("senderName", senderNameInput.value || "");
-        formData.append("amount", amountInput.value || "");   // <-- NEW
-
+        formData.append("amount", amountInput.value || "");
 
         statusEl.textContent = "Uploading...";
 
@@ -233,9 +377,15 @@
 
         if (!res.ok || !data.ok) throw new Error(data.error || "Upload failed");
 
-        statusEl.textContent = "Receipt sent successfully. Thank you!";
+        // Clear fields after success
+        senderNameInput.value = "";
+        amountInput.value = "";
         photoInput.value = "";
         fileNameEl.textContent = "No file chosen";
+        statusEl.textContent = "";
+
+        // Show success modal
+        openSuccessModal();
       } catch (err) {
         console.error(err);
         statusEl.textContent = "There was a problem sending your receipt. Please try again.";
