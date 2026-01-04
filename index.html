@@ -210,6 +210,59 @@
       color: #ffffff;
       cursor: pointer;
     }
+
+    /* --- Success modal --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s ease;
+}
+
+.modal-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Animation states */
+.modal-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px 20px 20px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform .5s ease, opacity .5s ease;
+}
+
+/* When visible */
+.modal-overlay.show .modal-card {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* When closing */
+.modal-overlay.hiding {
+  opacity: 0;
+}
+
+.modal-overlay.hiding .modal-card {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+
   </style>
 </head>
 <body>
@@ -335,13 +388,19 @@
       });
     }
 
-    function openSuccessModal() {
-      successModal.classList.add("show");
-    }
+function openSuccessModal() {
+  successModal.classList.remove("hiding");
+  successModal.classList.add("show");
+}
 
-    function closeSuccessModal() {
-      successModal.classList.remove("show");
-    }
+function closeSuccessModal() {
+  successModal.classList.add("hiding");
+
+  setTimeout(() => {
+    successModal.classList.remove("show", "hiding");
+  }, 500); // match CSS duration
+}
+
 
     // Close modal on button click or tapping background
     modalClose.addEventListener("click", closeSuccessModal);
