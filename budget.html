@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Budget Request</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #121b2f;
+      --panel2: #0f172a;
+      --text: #e7eefc;
+      --muted: #9fb0d0;
+      --border: rgba(255,255,255,.12);
+      --accent: #4f8cff;
+      --danger: #ff5c7a;
+      --ok: #2ee59d;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 14px;
+      --radius2: 10px;
+      --pad: 14px;
+      --pad2: 10px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(79,140,255,.18), transparent 55%),
+                  radial-gradient(900px 600px at 100% 0%, rgba(46,229,157,.12), transparent 50%),
+                  var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 26px 16px 60px;
+    }
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: .2px;
+    }
+    .subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 880px) {
+      .grid { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: flex-start; }
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+    input[type="text"], input[type="date"], textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      background: rgba(15, 23, 42, .65);
+      color: var(--text);
+      padding: 11px 12px;
+      outline: none;
+      transition: border-color .15s ease;
+    }
+    input[type="text"]:focus, input[type="date"]:focus, textarea:focus {
+      border-color: rgba(79,140,255,.65);
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .table-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, .4);
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    th {
+      text-align: left;
+      font-size: 12px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+    .cell-input {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(11, 18, 32, .45);
+      color: var(--text);
+      outline: none;
+    }
+    .cell-input:focus { border-color: rgba(79,140,255,.65); }
+    .amount { text-align: right; font-variant-numeric: tabular-nums; }
+    .btns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    button {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .04s ease, background .15s ease, border-color .15s ease;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    button:hover { background: rgba(255,255,255,.08); }
+    button:active { transform: translateY(1px); }
+    .primary {
+      border-color: rgba(79,140,255,.5);
+      background: rgba(79,140,255,.14);
+    }
+    .primary:hover { background: rgba(79,140,255,.2); }
+    .danger {
+      border-color: rgba(255,92,122,.5);
+      background: rgba(255,92,122,.12);
+    }
+    .danger:hover { background: rgba(255,92,122,.18); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      font-variant-numeric: tabular-nums;
+    }
+    .total-label { color: var(--muted); font-size: 13px; }
+    .total-value { font-size: 20px; font-weight: 800; }
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 18px;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.62);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal {
+      width: min(920px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: linear-gradient(180deg, rgba(18,27,47,.96), rgba(15,23,42,.96));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .modal header {
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal h3 { margin: 0; font-size: 18px; }
+    .modal .section {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,.03);
+      margin-bottom: 10px;
+    }
+    .kv {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 8px 12px;
+      align-items: start;
+    }
+    @media (max-width: 700px) {
+      .kv { grid-template-columns: 1fr; }
+    }
+    .k { color: var(--muted); font-size: 13px; }
+    .v { font-size: 14px; white-space: pre-wrap; }
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .mini-table th, .mini-table td {
+      border-bottom: 1px solid var(--border);
+      padding: 8px 6px;
+    }
+    .mini-table th {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .35px;
+      font-size: 12px;
+    }
+    .right { text-align: right; font-variant-numeric: tabular-nums; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Budget Request</h1>
+        <div class="subtitle">Fill it out fast. Review it. Submit it. (Email delivery for now.)</div>
+      </div>
+      <div class="pill" aria-live="polite">
+        <div>
+          <div class="total-label">Total</div>
+          <div class="total-value" id="totalDisplay">$0.00</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top fields -->
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label for="budgetFor">Budget Requested For</label>
+          <input id="budgetFor" type="text" placeholder="e.g., Brightstone - Office 1 / Client Name / Project" />
+        </div>
+        <div>
+          <label for="requestedBy">Requested by (Name)</label>
+          <input id="requestedBy" type="text" placeholder="Your name" />
+        </div>
+
+        <div>
+          <label for="dateStart">Budget Requested Date Range (Start)</label>
+          <input id="dateStart" type="date" />
+        </div>
+        <div>
+          <label for="dateEnd">Budget Requested Date Range (End)</label>
+          <input id="dateEnd" type="date" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Groceries -->
+    <div class="card">
+      <div class="table-head">
+        <div>
+          <h2>Groceries</h2>
+          <div class="hint">Add people + amounts</div>
+        </div>
+        <div class="btns">
+          <button type="button" class="primary" data-add-row="groceries">+ Add Row</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70%;">Person Name</th>
+            <th style="width: 22%;" class="right">Amount</th>
+            <th style="width: 8%;"></th>
+          </tr>
+        </thead>
+        <tbody id="groceriesBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Travel / Gas -->
+    <div class="card">
+      <div class="table-head">
+        <div>
+          <h2>Travel / Gas</h2>
+          <div class="hint">Car + amount</div>
+        </div>
+        <div class="btns">
+          <button type="button" class="primary" data-add-row="travel">+ Add Row</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70%;">Car</th>
+            <th style="width: 22%;" class="right">Amount</th>
+            <th style="width: 8%;"></th>
+          </tr>
+        </thead>
+        <tbody id="travelBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Misc -->
+    <div class="card">
+      <div class="table-head">
+        <div>
+          <h2>Miscellaneous</h2>
+          <div class="hint">Description + amount</div>
+        </div>
+        <div class="btns">
+          <button type="button" class="primary" data-add-row="misc">+ Add Row</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70%;">Description</th>
+            <th style="width: 22%;" class="right">Amount</th>
+            <th style="width: 8%;"></th>
+          </tr>
+        </thead>
+        <tbody id="miscBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Notes + actions -->
+    <div class="card">
+      <div style="margin-bottom: 12px;">
+        <label for="notes">Budget Notes</label>
+        <textarea id="notes" placeholder="Anything the approver should know..."></textarea>
+      </div>
+
+      <div class="row">
+        <div class="hint">
+          Tip: amounts accept “12”, “12.34”, “$12.34” — we’ll normalize them.
+        </div>
+        <div class="btns">
+          <button type="button" id="reviewBtn">Click to Review</button>
+          <button type="button" class="primary" id="submitBtn">Submit</button>
+        </div>
+      </div>
+
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <header>
+        <h3 id="modalTitle">Review Budget Submission</h3>
+        <div class="btns">
+          <button type="button" id="copyBtn">Copy Summary</button>
+          <button type="button" class="danger" id="closeModalBtn">Close</button>
+        </div>
+      </header>
+
+      <div class="section" id="reviewTop"></div>
+      <div class="section" id="reviewGroceries"></div>
+      <div class="section" id="reviewTravel"></div>
+      <div class="section" id="reviewMisc"></div>
+      <div class="section" id="reviewNotes"></div>
+      <div class="section" id="reviewTotal"></div>
+
+      <div class="hint">Submitting will send this same content to the backend (email for now).</div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Helpers ----------
+    const money = (n) => {
+      const v = Number.isFinite(n) ? n : 0;
+      return v.toLocaleString(undefined, { style: "currency", currency: "USD" });
+    };
+
+    const parseAmount = (raw) => {
+      if (raw == null) return 0;
+      const s = String(raw).trim();
+      if (!s) return 0;
+      // keep digits, dot, minus
+      const cleaned = s.replace(/[^0-9.\-]/g, "");
+      const num = Number(cleaned);
+      return Number.isFinite(num) ? num : 0;
+    };
+
+    const todayISO = () => {
+      const d = new Date();
+      const pad = (x) => String(x).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    // ---------- State ----------
+    const state = {
+      groceries: [],
+      travel: [],
+      misc: []
+    };
+
+    // ---------- Row builders ----------
+    function makeRow(section, leftPlaceholder) {
+      const tr = document.createElement("tr");
+
+      const tdLeft = document.createElement("td");
+      const left = document.createElement("input");
+      left.type = "text";
+      left.className = "cell-input";
+      left.placeholder = leftPlaceholder;
+      tdLeft.appendChild(left);
+
+      const tdAmt = document.createElement("td");
+      const amt = document.createElement("input");
+      amt.type = "text";
+      amt.className = "cell-input amount";
+      amt.placeholder = "0.00";
+      amt.inputMode = "decimal";
+      amt.addEventListener("input", updateTotal);
+      tdAmt.appendChild(amt);
+
+      const tdDel = document.createElement("td");
+      tdDel.style.textAlign = "right";
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "danger";
+      delBtn.textContent = "✕";
+      delBtn.title = "Remove row";
+      delBtn.addEventListener("click", () => {
+        tr.remove();
+        updateTotal();
+      });
+      tdDel.appendChild(delBtn);
+
+      tr.appendChild(tdLeft);
+      tr.appendChild(tdAmt);
+      tr.appendChild(tdDel);
+
+      // store refs on row for extraction
+      tr._left = left;
+      tr._amt = amt;
+
+      return tr;
+    }
+
+    function addRow(section) {
+      const bodyMap = {
+        groceries: el("groceriesBody"),
+        travel: el("travelBody"),
+        misc: el("miscBody")
+      };
+      const placeholders = {
+        groceries: "Person name",
+        travel: "Vehicle (car, van, etc.)",
+        misc: "What is this for?"
+      };
+
+      const body = bodyMap[section];
+      const tr = makeRow(section, placeholders[section]);
+      body.appendChild(tr);
+      updateTotal();
+    }
+
+    function extractTable(section) {
+      const bodyMap = {
+        groceries: el("groceriesBody"),
+        travel: el("travelBody"),
+        misc: el("miscBody")
+      };
+      const body = bodyMap[section];
+      const rows = Array.from(body.querySelectorAll("tr"));
+      return rows
+        .map(r => ({
+          item: (r._left?.value ?? "").trim(),
+          amount: parseAmount(r._amt?.value ?? "")
+        }))
+        .filter(x => x.item || x.amount); // keep non-empty rows
+    }
+
+    function computeTotal(payload) {
+      const sum = (arr) => arr.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
+      return sum(payload.groceries) + sum(payload.travel) + sum(payload.misc);
+    }
+
+    function updateTotal() {
+      const payload = buildPayload(false);
+      const total = computeTotal(payload);
+      el("totalDisplay").textContent = money(total);
+    }
+
+    // ---------- Payload ----------
+    function buildPayload(includeMeta = true) {
+      const payload = {
+        budgetRequestedFor: el("budgetFor").value.trim(),
+        requestedBy: el("requestedBy").value.trim(),
+        dateStart: el("dateStart").value,
+        dateEnd: el("dateEnd").value,
+        groceries: extractTable("groceries").map(r => ({ personName: r.item, amount: r.amount })),
+        travel: extractTable("travel").map(r => ({ car: r.item, amount: r.amount })),
+        misc: extractTable("misc").map(r => ({ description: r.item, amount: r.amount })),
+        notes: el("notes").value.trim(),
+      };
+
+      payload.total = computeTotal(payload);
+
+      if (includeMeta) {
+        payload.clientMeta = {
+          submittedAtLocal: new Date().toString(),
+          userAgent: navigator.userAgent
+        };
+      }
+
+      return payload;
+    }
+
+    function validate(payload) {
+      const errors = [];
+
+      if (!payload.budgetRequestedFor) errors.push("Budget Requested For is required.");
+      if (!payload.requestedBy) errors.push("Requested by (Name) is required.");
+      if (!payload.dateStart || !payload.dateEnd) errors.push("Date range (start and end) is required.");
+      if (payload.dateStart && payload.dateEnd && payload.dateEnd < payload.dateStart) {
+        errors.push("Date range is invalid (end is before start).");
+      }
+
+      const hasAnyLine =
+        payload.groceries.length || payload.travel.length || payload.misc.length;
+
+      if (!hasAnyLine) errors.push("Add at least one line item (Groceries, Travel/Gas, or Misc).");
+
+      return errors;
+    }
+
+    // ---------- Review Modal ----------
+    function openModal() {
+      const payload = buildPayload(false);
+      const errors = validate(payload);
+
+      if (errors.length) {
+        setStatus("Please fix: " + errors.join(" "), true);
+        return;
+      }
+
+      // Top summary
+      el("reviewTop").innerHTML = `
+        <div class="kv">
+          <div class="k">Budget Requested For</div><div class="v">${escapeHtml(payload.budgetRequestedFor)}</div>
+          <div class="k">Requested By</div><div class="v">${escapeHtml(payload.requestedBy)}</div>
+          <div class="k">Date Range</div><div class="v">${escapeHtml(payload.dateStart)} → ${escapeHtml(payload.dateEnd)}</div>
+        </div>
+      `;
+
+      el("reviewGroceries").innerHTML = sectionTableHtml("Groceries", ["Person Name", "Amount"], payload.groceries.map(x => [x.personName, money(x.amount)]));
+      el("reviewTravel").innerHTML = sectionTableHtml("Travel / Gas", ["Car", "Amount"], payload.travel.map(x => [x.car, money(x.amount)]));
+      el("reviewMisc").innerHTML = sectionTableHtml("Miscellaneous", ["Description", "Amount"], payload.misc.map(x => [x.description, money(x.amount)]));
+
+      el("reviewNotes").innerHTML = `
+        <div class="kv">
+          <div class="k">Budget Notes</div>
+          <div class="v">${payload.notes ? escapeHtml(payload.notes) : `<span class="muted">(none)</span>`}</div>
+        </div>
+      `;
+
+      el("reviewTotal").innerHTML = `
+        <div class="kv">
+          <div class="k">Total</div>
+          <div class="v"><strong>${money(payload.total)}</strong></div>
+        </div>
+      `;
+
+      el("modalBackdrop").style.display = "flex";
+    }
+
+    function closeModal() {
+      el("modalBackdrop").style.display = "none";
+    }
+
+    function sectionTableHtml(title, headers, rows) {
+      const empty = `<div class="kv"><div class="k">${escapeHtml(title)}</div><div class="v muted">(none)</div></div>`;
+      if (!rows.length) return empty;
+
+      const thead = headers.map(h => `<th>${escapeHtml(h)}</th>`).join("");
+      const tbody = rows.map(r => `
+        <tr>
+          <td>${escapeHtml(r[0] ?? "")}</td>
+          <td class="right">${escapeHtml(r[1] ?? "")}</td>
+        </tr>
+      `).join("");
+
+      return `
+        <div class="k">${escapeHtml(title)}</div>
+        <table class="mini-table">
+          <thead><tr>${thead}</tr></thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      `;
+    }
+
+    function buildPlainTextSummary(payload) {
+      const lines = [];
+      lines.push(`Budget Requested For: ${payload.budgetRequestedFor}`);
+      lines.push(`Requested By: ${payload.requestedBy}`);
+      lines.push(`Date Range: ${payload.dateStart} -> ${payload.dateEnd}`);
+      lines.push("");
+
+      const listSection = (name, rows, leftLabel) => {
+        lines.push(`${name}:`);
+        if (!rows.length) {
+          lines.push("  (none)");
+        } else {
+          rows.forEach(r => {
+            lines.push(`  - ${leftLabel}: ${r[leftLabelKey(leftLabel)] ?? ""} | Amount: ${money(r.amount)}`);
+          });
+        }
+        lines.push("");
+      };
+
+      // helper to map label to key
+      function leftLabelKey(label){
+        if (label === "Person") return "personName";
+        if (label === "Car") return "car";
+        if (label === "Description") return "description";
+        return "item";
+      }
+
+      listSection("Groceries", payload.groceries, "Person");
+      listSection("Travel / Gas", payload.travel, "Car");
+      listSection("Miscellaneous", payload.misc, "Description");
+
+      lines.push("Notes:");
+      lines.push(payload.notes ? payload.notes : "(none)");
+      lines.push("");
+      lines.push(`TOTAL: ${money(payload.total)}`);
+
+      return lines.join("\n");
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // ---------- Submit ----------
+    async function submit() {
+      const payload = buildPayload(true);
+      const errors = validate(payload);
+      if (errors.length) {
+        setStatus("Please fix: " + errors.join(" "), true);
+        return;
+      }
+
+      setStatus("Submitting…");
+
+      try {
+        // Backend later: this is the endpoint we’ll build in Node/Express
+        const res = await fetch("/budget", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`Server responded ${res.status}. ${text}`.trim());
+        }
+
+        setStatus("Submitted successfully ✅");
+        closeModal();
+      } catch (err) {
+        // For now, if backend doesn't exist yet, user still wants to test flow:
+        setStatus("Submit failed (backend not wired yet?) — open Review and use Copy Summary for now. Details: " + (err?.message || err), true);
+        console.error(err);
+      }
+    }
+
+    function setStatus(msg, isError = false) {
+      const s = el("status");
+      s.textContent = msg;
+      s.style.color = isError ? "rgba(255,92,122,.95)" : "rgba(159,176,208,.95)";
+    }
+
+    // ---------- Events ----------
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-add-row]");
+      if (btn) addRow(btn.getAttribute("data-add-row"));
+    });
+
+    el("reviewBtn").addEventListener("click", openModal);
+    el("closeModalBtn").addEventListener("click", closeModal);
+    el("modalBackdrop").addEventListener("click", (e) => {
+      if (e.target === el("modalBackdrop")) closeModal();
+    });
+
+    el("submitBtn").addEventListener("click", () => {
+      // if they didn't review, still allow submit
+      submit();
+    });
+
+    el("copyBtn").addEventListener("click", async () => {
+      const payload = buildPayload(false);
+      const summary = buildPlainTextSummary(payload);
+      try {
+        await navigator.clipboard.writeText(summary);
+        setStatus("Copied summary to clipboard ✅");
+      } catch {
+        setStatus("Could not copy automatically — your browser blocked clipboard.", true);
+      }
+    });
+
+    // ---------- Init ----------
+    (function init() {
+      // Default date range: today -> today (easy for them)
+      const t = todayISO();
+      el("dateStart").value = t;
+      el("dateEnd").value = t;
+
+      // Start with 1 row per section so it doesn’t feel “empty”
+      addRow("groceries");
+      addRow("travel");
+      addRow("misc");
+      updateTotal();
+    })();
+  </script>
+</body>
+</html>
