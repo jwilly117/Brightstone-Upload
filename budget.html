@@ -259,15 +259,31 @@
     }
     .right { text-align: right; font-variant-numeric: tabular-nums; }
     .muted { color: var(--muted); }
+    .title-icon-img {
+  width: 55px;
+  height: 55px;
+  padding: 6px;
+  border-radius: 10px;
+  background: rgb(231, 237, 248);
+  border: 1px solid rgba(79,140,255,.35);
+}
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div>
-        <h1>Budget Request - WORK IN PROGRESS - INCOMPLETE</h1>
-        <div class="subtitle">Fill it out. Review it. Submit it. (Email delivery for now.)</div>
-      </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+        <img
+            src="Brightstone-Mark-ForestGreen.png"
+            alt=""
+            class="title-icon-img"
+        />
+        <div>
+            <h1>Budget Request</h1>
+            <div class="subtitle">Fill it out fast. Review it. Submit it.</div>
+        </div>
+        </div>
       <div class="pill" aria-live="polite">
         <div>
           <div class="total-label">Total</div>
